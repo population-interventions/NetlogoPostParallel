@@ -48,4 +48,5 @@ def main(arrayIndex):
 
 
 if __name__== "__main__":
-	main(sys.argv[1] if 1 in sys.argv else 1)
+	# length check for testing with no arguments.
+	main(sys.argv[1] if len(sys.argv) > 1 else 1)
