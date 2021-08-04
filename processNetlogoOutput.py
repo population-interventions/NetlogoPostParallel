@@ -17,7 +17,7 @@ from utilities import SplitNetlogoList
 from utilities import SplitNetlogoNestedList
 from utilities import OutputToFile
 from utilities import AddFiles
-from utilities import ToHeatmap
+from utilities import GetCohortData
 
 
 def SplitOutDailyData(chunk, cohorts, days, arrayIndex, name, filePath, fileAppend, fillTo=False):
@@ -31,7 +31,7 @@ def ProcessAbmChunk(
 		measureCols_raw, indexRenameFunc, day_override=False):
 	# Drop colums that are probably never useful.
 	
-	filename = outputDir + 'process'
+	filename = outputDir + 'processed'
 	
 	chunk = chunk[[
 		'[run number]', 'rand_seed',
@@ -53,7 +53,7 @@ def ProcessAbmChunk(
 		staticData = SplitNetlogoList(staticData, cohorts, 0, '').transpose()
 		staticData = staticData.rename(
 			columns={'age_listOut': 'age', 'atsi_listOut': 'atsi', 'morbid_listOut': 'morbid'})
-		OutputToFile(staticData, filename + '_static') 
+		OutputToFile(staticData, filename + '_static' + '_' + str(arrayIndex)) 
 	
 	chunk = chunk.drop(['age_listOut', 'atsi_listOut', 'morbid_listOut'], axis=1)
 	chunk = chunk.rename(mapper={'[run number]' : 'run'}, axis=1)
@@ -63,7 +63,7 @@ def ProcessAbmChunk(
 		'scalephase', 'cumulativeInfected',
 	]
 	
-	OutputToFile(chunk[secondaryData], filename + '_secondary')
+	OutputToFile(chunk[secondaryData], filename + '_secondary' + '_' + str(arrayIndex))
 	chunk = chunk.drop(secondaryData, axis=1)
 	chunk = indexRenameFunc(chunk)
 	
@@ -73,6 +73,8 @@ def ProcessAbmChunk(
 	SplitOutDailyData(chunk, 1, days, arrayIndex, 'stage', filename, 'stage', fillTo=day_override)
 	SplitOutDailyData(chunk, cohorts, days, arrayIndex, 'infectNoVacArray', filename, 'infectNoVac', fillTo=day_override)
 	SplitOutDailyData(chunk, cohorts, days, arrayIndex, 'infectVacArray', filename, 'infectVac', fillTo=day_override)
+	if outputStaticData:
+		return staticData
 
 
 def ProcessAbmOutput(
@@ -83,7 +85,7 @@ def ProcessAbmOutput(
 		
 	print("Processing Files", filelist)
 	chunksize = 4 ** 7
-	firstProcess = (arrayIndex == 1)
+	firstProcess = True
 	for filename in filelist:
 		for chunk in tqdm(pd.read_csv(
 					filename + '.csv', chunksize=chunksize, header=6),
@@ -106,7 +108,7 @@ def ToVisualisation(chunk, outputDir, arrayIndex, append, measureCols, divisor=F
 	if outputDay:
 		chunk_day = chunk.copy()
 		chunk_day.columns = chunk_day.columns.droplevel(level=0)
-		OutputToFile(chunk_day, outputDir + '_' + append + '_daily_' + str(arrayIndex))
+		OutputToFile(chunk_day, outputDir + 'processed_' + append + '_daily_' + str(arrayIndex))
 		
 	index = chunk.columns.to_frame()
 	index['week'] = np.floor((index['day'] - dayStartOffset)/7)
@@ -116,7 +118,7 @@ def ToVisualisation(chunk, outputDir, arrayIndex, append, measureCols, divisor=F
 	chunk.columns = chunk.columns.droplevel(level=0)
 	chunk = chunk.groupby(level=[1], axis=1).sum()
 	
-	OutputToFile(chunk, outputDir + '_' + append + '_weeklyAgg_' + str(arrayIndex))
+	OutputToFile(chunk, outputDir + 'processed_' + append + '_weeklyAgg_' + str(arrayIndex))
 
 
 def ProcessFileToVisualisation(inputDir, outputDir, arrayIndex, append, measureCols, divisor=False, dayStartOffset=None, outputDay=False):
@@ -154,10 +156,123 @@ def CasesVisualise(inputDir, outputDir, arrayIndex, measureCols, dayStartOffset=
 		dayStartOffset=dayStartOffset, outputDay=True)
 
 
+############### Cohort outputs for mort/hosp ###############
+
+def CheckForProblem(df):
+	df = df.apply(lambda s: pd.to_numeric(s, errors='coerce').notnull().all())
+	if not df.eq(True).all():
+		print(df)
+
+
+def OutputDayAgeAgg(df, outputPrefix, measureCols, arrayIndex):
+	df = df.groupby(level=list(range(2 + len(measureCols))), axis=0).sum()
+	OutputToFile(df, outputPrefix + '_daily' + '_' + str(arrayIndex))
+	
+
+def OutputWeek(df, outputPrefix, arrayIndex):
+	index = df.columns.to_frame()
+	index['week'] = np.floor((index['day'] + 6)/7)
+	df.columns = pd.MultiIndex.from_frame(index)
+	
+	df = df.groupby(level=['week'], axis=1).sum()
+	CheckForProblem(df)
+	OutputToFile(df, outputPrefix + '_weeklyAgg' + '_' + str(arrayIndex))
+
+
+def OutputYear(df, outputPrefix, arrayIndex):
+	index = df.columns.to_frame()
+	index['year'] = np.floor((index['day'])/365)
+	df.columns = pd.MultiIndex.from_frame(index)
+	
+	df = df.groupby(level=['year'], axis=1).sum()
+	CheckForProblem(df)
+	OutputToFile(df, outputPrefix + '_yearlyAgg' + '_' + str(arrayIndex))
+
+
+def ProcessInfectChunk(df, chortDf, outputPrefix, arrayIndex):
+	df.columns = df.columns.set_levels(df.columns.levels[1].astype(int), level=1)
+	df.columns = df.columns.set_levels(df.columns.levels[2].astype(int), level=2)
+	df = df.sort_values(['cohort', 'day'], axis=1)
+	
+	col_index = df.columns.to_frame()
+	col_index = col_index.reset_index(drop=True)
+	col_index = pd.merge(
+		col_index, chortDf,
+		on='cohort',
+		how='left',
+		sort=False)
+	col_index = col_index.drop(columns=['atsi', 'morbid'])
+	df.columns = pd.MultiIndex.from_frame(col_index)
+	
+	df = df.groupby(level=[3, 1], axis=1).sum()
+
+	# In the ABM age range 15 represents ages 10-17 while age range 25 is
+	# ages 18-30. First redestribute these cohorts so they align with 10 year
+	# increments.
+	df[15], df[25] = df[15] + df[25]/5, df[25]*4/5
+
+	# Then split the 10 year cohorts in half.
+	ageCols = [i*10 + 5 for i in range(10)]
+	df = df.stack('day')
+	for age in ageCols:
+		# TODO, vectorise?
+		df[age - 5] = df[age]/2
+		df[age] = df[age]/2
+	df = df.unstack('day')
+	
+	# Add extra cohorts missing from ABM
+	df = df.sort_index(axis=0)
+	df = df.sort_index(axis=1)
+	for age in [100 + i*5 for i in range(2)]:
+		df1 = df.loc[:, slice(80, 80)].rename(columns={80 : age}, level=0)
+		df = df.join(df1)
+	
+	df = df.stack(level=['age'])
+	OutputToFile(df, outputPrefix + '_' + str(arrayIndex))
+	OutputWeek(df.copy(), outputPrefix, arrayIndex)
+	OutputYear(df.copy(), outputPrefix, arrayIndex)
+	return df
+
+
+def ProcessInfectCohorts(measureCols, filename, cohortFile, outputPrefix, arrayIndex):
+	cohortData = GetCohortData(cohortFile)
+	chunksize = 4 ** 7
+	
+	for chunk in tqdm(pd.read_csv(
+				filename + '.csv', 
+				index_col=list(range(2 + len(measureCols))),
+				header=list(range(3)),
+				dtype={'day' : int, 'cohort' : int},
+				chunksize=chunksize),
+			total=4):
+		df = ProcessInfectChunk(chunk, cohortData, outputPrefix, arrayIndex)
+		OutputDayAgeAgg(df, outputPrefix, measureCols, arrayIndex)
+
+
+def ProcessInfectionCohorts(inputDir, outputDir, arrayIndex, measureCols):
+	print('Processing vaccination infection for MortHosp')
+	ProcessInfectCohorts(
+		measureCols,
+		inputDir + 'processed_infectVac' + '_' + str(arrayIndex),
+		inputDir + 'processed_static' + '_' + str(arrayIndex),
+		outputDir + 'infect_vac', arrayIndex)
+	print('Processing non-vaccination infection for MortHosp')
+	ProcessInfectCohorts(
+		measureCols,
+		inputDir + 'processed_infectNoVac' + '_' + str(arrayIndex),
+		inputDir + 'processed_static' + '_' + str(arrayIndex),
+		outputDir + 'infect_noVac', arrayIndex)
+
+
+############### Cohort outputs for mort/hosp ###############
+
 def DoAbmProcessing(inputDir, outputDir, arrayIndex, indexRenameFunc, measureCols, measureCols_raw, day_override=False, dayStartOffset=0):
 	print('Processing ABM Output', inputDir, arrayIndex)
 	ProcessAbmOutput(inputDir, outputDir + 'step_1/', arrayIndex, indexRenameFunc, measureCols_raw, day_override=day_override)
 	
 	CasesVisualise(outputDir + 'step_1/', outputDir + 'visualise/', arrayIndex, measureCols, dayStartOffset=dayStartOffset)
 	InfectionsAndStageVisualise(outputDir + 'step_1/', outputDir + 'visualise/', arrayIndex, measureCols, dayStartOffset=dayStartOffset)
+	
+	print('ProcessInfectionCohorts', inputDir, arrayIndex)
+	ProcessInfectionCohorts(outputDir + 'step_1/', outputDir + 'cohort/', arrayIndex, measureCols)
 
