@@ -123,7 +123,7 @@ def ToVisualisation(chunk, outputDir, arrayIndex, append, measureCols, divisor=F
 
 def ProcessFileToVisualisation(inputDir, outputDir, arrayIndex, append, measureCols, divisor=False, dayStartOffset=None, outputDay=False):
 	chunksize = 4 ** 7
-	fileIn = (inputDir + 'process').format(str(arrayIndex))
+	fileIn = (inputDir + 'processed').format(str(arrayIndex))
 	for chunk in tqdm(pd.read_csv(
 				fileIn + '_' + append + '_' + str(arrayIndex) + '.csv', chunksize=chunksize,
 				index_col=list(range(2 + len(measureCols))),
