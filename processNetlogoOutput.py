@@ -23,7 +23,7 @@ from utilities import GetCohortData
 def SplitOutDailyData(chunk, cohorts, days, arrayIndex, name, filePath, fileAppend, fillTo=False):
 	columnName = name + '_listOut'
 	df = SplitNetlogoNestedList(chunk, cohorts, days, columnName, name, fillTo=fillTo)
-	OutputToFile(df, filePath + '_' + fileAppend + '_' + str(arrayIndex))
+	OutputToFile(df, filePath + '_' + fileAppend + '_' + str(arrayIndex), head=False)
 
 
 def ProcessAbmChunk(
@@ -53,7 +53,7 @@ def ProcessAbmChunk(
 		staticData = SplitNetlogoList(staticData, cohorts, 0, '').transpose()
 		staticData = staticData.rename(
 			columns={'age_listOut': 'age', 'atsi_listOut': 'atsi', 'morbid_listOut': 'morbid'})
-		OutputToFile(staticData, filename + '_static' + '_' + str(arrayIndex)) 
+		OutputToFile(staticData, filename + '_static' + '_' + str(arrayIndex), head=False) 
 	
 	chunk = chunk.drop(['age_listOut', 'atsi_listOut', 'morbid_listOut'], axis=1)
 	chunk = chunk.rename(mapper={'[run number]' : 'run'}, axis=1)
@@ -63,7 +63,7 @@ def ProcessAbmChunk(
 		'scalephase', 'cumulativeInfected',
 	]
 	
-	OutputToFile(chunk[secondaryData], filename + '_secondary' + '_' + str(arrayIndex))
+	OutputToFile(chunk[secondaryData], filename + '_secondary' + '_' + str(arrayIndex), head=False)
 	chunk = chunk.drop(secondaryData, axis=1)
 	chunk = indexRenameFunc(chunk)
 	
@@ -71,8 +71,8 @@ def ProcessAbmChunk(
 	SplitOutDailyData(chunk, 1, days, arrayIndex, 'case7', filename, 'case7', fillTo=day_override)
 	SplitOutDailyData(chunk, 1, days, arrayIndex, 'case14', filename, 'case14', fillTo=day_override)
 	SplitOutDailyData(chunk, 1, days, arrayIndex, 'stage', filename, 'stage', fillTo=day_override)
-	SplitOutDailyData(chunk, cohorts, days, arrayIndex, 'infectNoVacArray', filename, 'infectNoVac', fillTo=day_override)
-	SplitOutDailyData(chunk, cohorts, days, arrayIndex, 'infectVacArray', filename, 'infectVac', fillTo=day_override)
+	SplitOutDailyData(chunk, cohorts, days, arrayIndex, 'infectNoVacArray', 'output_big/' + filename, 'infectNoVac', fillTo=day_override)
+	SplitOutDailyData(chunk, cohorts, days, arrayIndex, 'infectVacArray', 'output_big/' + filename, 'infectVac', fillTo=day_override)
 
 
 def ProcessAbmOutput(
@@ -106,7 +106,7 @@ def ToVisualisation(chunk, outputDir, arrayIndex, append, measureCols, divisor=F
 	if outputDay:
 		chunk_day = chunk.copy()
 		chunk_day.columns = chunk_day.columns.droplevel(level=0)
-		OutputToFile(chunk_day, outputDir + 'processed_' + append + '_daily_' + str(arrayIndex))
+		OutputToFile(chunk_day, outputDir + 'processed_' + append + '_daily_' + str(arrayIndex), head=False)
 		
 	index = chunk.columns.to_frame()
 	index['week'] = np.floor((index['day'] - dayStartOffset)/7)
@@ -116,7 +116,7 @@ def ToVisualisation(chunk, outputDir, arrayIndex, append, measureCols, divisor=F
 	chunk.columns = chunk.columns.droplevel(level=0)
 	chunk = chunk.groupby(level=[1], axis=1).sum()
 	
-	OutputToFile(chunk, outputDir + 'processed_' + append + '_weeklyAgg_' + str(arrayIndex))
+	OutputToFile(chunk, outputDir + 'processed_' + append + '_weeklyAgg_' + str(arrayIndex), head=False)
 
 
 def ProcessFileToVisualisation(inputDir, outputDir, arrayIndex, append, measureCols, divisor=False, dayStartOffset=None, outputDay=False):
@@ -133,9 +133,9 @@ def ProcessFileToVisualisation(inputDir, outputDir, arrayIndex, append, measureC
 
 def InfectionsAndStageVisualise(inputDir, outputDir, arrayIndex, measureCols, dayStartOffset=0):
 	print('Processing infectNoVac')
-	ProcessFileToVisualisation(inputDir, outputDir, arrayIndex, 'infectNoVac', measureCols, dayStartOffset=dayStartOffset)
+	ProcessFileToVisualisation('output_big/' + inputDir, outputDir, arrayIndex, 'infectNoVac', measureCols, dayStartOffset=dayStartOffset)
 	print('Processing infectVac')
-	ProcessFileToVisualisation(inputDir, outputDir, arrayIndex, 'infectVac', measureCols, dayStartOffset=dayStartOffset)
+	ProcessFileToVisualisation('output_big/' + inputDir, outputDir, arrayIndex, 'infectVac', measureCols, dayStartOffset=dayStartOffset)
 
 	print('Processing stage')
 	ProcessFileToVisualisation(inputDir, outputDir, arrayIndex, 'stage', measureCols, dayStartOffset=dayStartOffset)
@@ -164,7 +164,7 @@ def CheckForProblem(df):
 
 def OutputDayAgeAgg(df, outputPrefix, measureCols, arrayIndex):
 	df = df.groupby(level=list(range(2 + len(measureCols))), axis=0).sum()
-	OutputToFile(df, outputPrefix + '_daily' + '_' + str(arrayIndex))
+	OutputToFile(df, outputPrefix + '_daily' + '_' + str(arrayIndex), head=False)
 	
 
 def OutputWeek(df, outputPrefix, arrayIndex):
@@ -174,7 +174,7 @@ def OutputWeek(df, outputPrefix, arrayIndex):
 	
 	df = df.groupby(level=['week'], axis=1).sum()
 	CheckForProblem(df)
-	OutputToFile(df, outputPrefix + '_weeklyAgg' + '_' + str(arrayIndex))
+	OutputToFile(df, outputPrefix + '_weeklyAgg' + '_' + str(arrayIndex), head=False)
 
 def OutputTenday(df, outputPrefix, arrayIndex):
 	index = df.columns.to_frame()
@@ -183,7 +183,7 @@ def OutputTenday(df, outputPrefix, arrayIndex):
 	
 	df = df.groupby(level=['tenday'], axis=1).sum()
 	CheckForProblem(df)
-	OutputToFile(df, outputPrefix + '_tendayAgg' + '_' + str(arrayIndex))
+	OutputToFile(df, outputPrefix + '_tendayAgg' + '_' + str(arrayIndex), head=False)
 
 
 def OutputYear(df, outputPrefix, arrayIndex):
@@ -193,7 +193,7 @@ def OutputYear(df, outputPrefix, arrayIndex):
 	
 	df = df.groupby(level=['year'], axis=1).sum()
 	CheckForProblem(df)
-	OutputToFile(df, outputPrefix + '_yearlyAgg' + '_' + str(arrayIndex))
+	OutputToFile(df, outputPrefix + '_yearlyAgg' + '_' + str(arrayIndex), head=False)
 
 
 def ProcessInfectChunk(df, chortDf, outputPrefix, arrayIndex):
@@ -235,7 +235,7 @@ def ProcessInfectChunk(df, chortDf, outputPrefix, arrayIndex):
 		df = df.join(df1)
 	
 	df = df.stack(level=['age'])
-	OutputToFile(df, outputPrefix + '_' + str(arrayIndex))
+	OutputToFile(df, 'output_big/' + outputPrefix + '_' + str(arrayIndex), head=False)
 	OutputWeek(df.copy(), outputPrefix, arrayIndex)
 	OutputTenday(df.copy(), outputPrefix, arrayIndex)
 	OutputYear(df.copy(), outputPrefix, arrayIndex)
@@ -261,13 +261,13 @@ def ProcessInfectionCohorts(inputDir, outputDir, arrayIndex, measureCols):
 	print('Processing vaccination infection for MortHosp')
 	ProcessInfectCohorts(
 		measureCols,
-		inputDir + 'processed_infectVac' + '_' + str(arrayIndex),
+		'output_big/' + inputDir + 'processed_infectVac' + '_' + str(arrayIndex),
 		inputDir + 'processed_static' + '_' + str(arrayIndex),
 		outputDir + 'infect_vac', arrayIndex)
 	print('Processing non-vaccination infection for MortHosp')
 	ProcessInfectCohorts(
 		measureCols,
-		inputDir + 'processed_infectNoVac' + '_' + str(arrayIndex),
+		'output_big/' + inputDir + 'processed_infectNoVac' + '_' + str(arrayIndex),
 		inputDir + 'processed_static' + '_' + str(arrayIndex),
 		outputDir + 'infect_noVac', arrayIndex)
 
