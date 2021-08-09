@@ -73,8 +73,6 @@ def ProcessAbmChunk(
 	SplitOutDailyData(chunk, 1, days, arrayIndex, 'stage', filename, 'stage', fillTo=day_override)
 	SplitOutDailyData(chunk, cohorts, days, arrayIndex, 'infectNoVacArray', filename, 'infectNoVac', fillTo=day_override)
 	SplitOutDailyData(chunk, cohorts, days, arrayIndex, 'infectVacArray', filename, 'infectVac', fillTo=day_override)
-	if outputStaticData:
-		return staticData
 
 
 def ProcessAbmOutput(
@@ -171,12 +169,21 @@ def OutputDayAgeAgg(df, outputPrefix, measureCols, arrayIndex):
 
 def OutputWeek(df, outputPrefix, arrayIndex):
 	index = df.columns.to_frame()
-	index['week'] = np.floor((index['day'] + 6)/7)
+	index['week'] = np.floor(index['day']/7)
 	df.columns = pd.MultiIndex.from_frame(index)
 	
 	df = df.groupby(level=['week'], axis=1).sum()
 	CheckForProblem(df)
 	OutputToFile(df, outputPrefix + '_weeklyAgg' + '_' + str(arrayIndex))
+
+def OutputTenday(df, outputPrefix, arrayIndex):
+	index = df.columns.to_frame()
+	index['tenday'] = np.floor(index['day']/10)
+	df.columns = pd.MultiIndex.from_frame(index)
+	
+	df = df.groupby(level=['tenday'], axis=1).sum()
+	CheckForProblem(df)
+	OutputToFile(df, outputPrefix + '_tendayAgg' + '_' + str(arrayIndex))
 
 
 def OutputYear(df, outputPrefix, arrayIndex):
@@ -230,6 +237,7 @@ def ProcessInfectChunk(df, chortDf, outputPrefix, arrayIndex):
 	df = df.stack(level=['age'])
 	OutputToFile(df, outputPrefix + '_' + str(arrayIndex))
 	OutputWeek(df.copy(), outputPrefix, arrayIndex)
+	OutputTenday(df.copy(), outputPrefix, arrayIndex)
 	OutputYear(df.copy(), outputPrefix, arrayIndex)
 	return df
 
