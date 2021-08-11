@@ -6,17 +6,19 @@ from processNetlogoOutput import DoAbmProcessing
 
 measureCols_raw = [
 	'r0_range',
-	'compound_essential',
+	'policy_pipeline',
 	'data_suffix',
 	'param_vac_rate_mult',
-	'param_policy',
+	'param_final_phase',
+	'param_vacincurmult',
 ]
 measureCols = [
 	'R0',
-	'Essential',
+	'Policy',
 	'Rollout',
 	'VacRate',
-	'Policy',
+	'Kids',
+	'IncurRate',
 ]
 
 def indexRenameFunc(chunk):
@@ -28,6 +30,10 @@ def indexRenameFunc(chunk):
 		'_int.csv' : 'INT',
 		'_az_25.csv' : 'AZ_25',
 		'_az_50.csv' : 'AZ_50',
+	})
+	index['param_final_phase'] = index['param_final_phase'].replace({
+		3 : 'No',
+		4 : 'Yes',
 	})
 	
 	renameCols = {measureCols_raw[i] : measureCols[i] for i in range(len(measureCols))}
