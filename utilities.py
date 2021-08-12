@@ -138,7 +138,7 @@ def GetCohortData(cohortFile):
 	return df
 
 
-def AddFiles(outputName, fileList, index=1, header=1):
+def AddFiles(outputName, fileList, index=1, header=1, head=True):
 	first = True
 	for fileName in fileList:
 		if first:
@@ -152,7 +152,7 @@ def AddFiles(outputName, fileList, index=1, header=1):
 				fileName + '.csv',
 				index_col=list(range(index)),
 				header=list(range(header)))
-	OutputToFile(df, outputName)
+	OutputToFile(df, outputName, head=head)
 
 
 def ListRemove(myList, element):
