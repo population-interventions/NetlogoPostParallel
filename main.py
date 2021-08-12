@@ -45,7 +45,7 @@ def indexRenameFunc(chunk):
 
 inputDir = 'outputs_snowy/'
 outputDir = 'outputs_post/'
-day_override = 728
+day_override = 574
 
 
 def main(arrayIndex):
