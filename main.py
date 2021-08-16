@@ -11,6 +11,7 @@ measureCols_raw = [
 	'param_vac_uptake_mult',
 	'param_final_phase',
 	'param_vacincurmult',
+	'sensitivity',
 ]
 measureCols = [
 	'R0',
@@ -19,6 +20,7 @@ measureCols = [
 	'VacUptake',
 	'Kids',
 	'IncurRate',
+	'sensitivity',
 ]
 
 def indexRenameFunc(chunk):
