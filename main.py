@@ -7,20 +7,18 @@ from processNetlogoOutput import DoAbmProcessing
 measureCols_raw = [
 	'r0_range',
 	'policy_pipeline',
-	'data_suffix',
 	'param_vac_uptake_mult',
 	'param_final_phase',
 	'param_vacincurmult',
-	'sensitivity',
+	'compound_trace',
 ]
 measureCols = [
 	'R0',
 	'Policy',
-	'Rollout',
 	'VacUptake',
 	'Kids',
 	'IncurRate',
-	'sensitivity',
+	'TracePower',
 ]
 
 def indexRenameFunc(chunk):

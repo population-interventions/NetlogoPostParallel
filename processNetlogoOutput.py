@@ -196,7 +196,7 @@ def OutputYear(df, outputPrefix, arrayIndex):
 	OutputToFile(df, outputPrefix + '_yearlyAgg' + '_' + str(arrayIndex), head=False)
 
 
-def ProcessInfectChunk(df, chortDf, outputPrefix, arrayIndex):
+def ProcessInfectChunk(df, chortDf, outputPrefix, arrayIndex, doTenday=False):
 	df.columns = df.columns.set_levels(df.columns.levels[1].astype(int), level=1)
 	df.columns = df.columns.set_levels(df.columns.levels[2].astype(int), level=2)
 	df = df.sort_values(['cohort', 'day'], axis=1)
@@ -237,7 +237,8 @@ def ProcessInfectChunk(df, chortDf, outputPrefix, arrayIndex):
 	df = df.stack(level=['age'])
 	OutputToFile(df, 'output_big/' + outputPrefix + '_' + str(arrayIndex), head=False)
 	OutputWeek(df.copy(), outputPrefix, arrayIndex)
-	OutputTenday(df.copy(), outputPrefix, arrayIndex)
+	if doTenday:
+		OutputTenday(df.copy(), outputPrefix, arrayIndex)
 	OutputYear(df.copy(), outputPrefix, arrayIndex)
 	return df
 
