@@ -8,7 +8,7 @@ measureCols_raw = [
 	'r0_range',
 	'param_policy',
 	'data_suffix',
-	'data_suffix2',
+	'data_suffix_2',
 	'param_vacincurmult',
 	'compound_trace',
 ]
@@ -35,7 +35,7 @@ def indexRenameFunc(chunk):
 		'_85' : '85%',
 		'_95' : '95%',
 	})
-	index['data_suffix2'] = index['data_suffix2'].replace({
+	index['data_suffix_2'] = index['data_suffix_2'].replace({
 		'_15.csv' : '16+',
 		'_10.csv' : '10+',
 		'_5.csv' : '5+',
