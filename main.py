@@ -25,12 +25,12 @@ def indexRenameFunc(chunk):
 	index = chunk.index.to_frame()
 	#index['R0'] = index['global_transmissibility_out'].apply(lambda x: 3.75 if x < 0.61333 else (4.17 if x < 0.681666 else 4.58))
 	
-	index['data_suffix'] = index['data_suffix'].replace({
-		'_bau.csv' : 'BAU',
-		'_int.csv' : 'INT',
-		'_az_25.csv' : 'AZ_25',
-		'_az_50.csv' : 'AZ_50',
-	})
+	#index['data_suffix'] = index['data_suffix'].replace({
+	#	'_bau.csv' : 'BAU',
+	#	'_int.csv' : 'INT',
+	#	'_az_25.csv' : 'AZ_25',
+	#	'_az_50.csv' : 'AZ_50',
+	#})
 	index['param_final_phase'] = index['param_final_phase'].replace({
 		3 : 'No',
 		4 : 'Yes',
