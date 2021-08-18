@@ -10,7 +10,6 @@ measureCols_raw = [
 	'data_suffix',
 	'data_suffix_2',
 	'param_vacincurmult',
-	'compound_trace',
 ]
 measureCols = [
 	'R0',
