@@ -30,13 +30,16 @@ def indexRenameFunc(chunk):
 	#	'_az_50.csv' : 'AZ_50',
 	#})
 	index['data_suffix'] = index['data_suffix'].replace({
-		'_70' : '70%',
-		'_85' : '85%',
-		'_95' : '95%',
+		'_65' : 0.6,
+		'_70' : 0.7,
+		'_80' : 0.8,
+		'_85' : 0.85,
+		'_95' : 0.95,
 	})
 	index['data_suffix_2'] = index['data_suffix_2'].replace({
 		'_15.csv' : '16+',
 		'_10.csv' : '10+',
+		'_12.csv' : '12+',
 		'_5.csv' : '5+',
 	})
 	
