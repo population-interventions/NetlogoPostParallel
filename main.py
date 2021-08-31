@@ -11,6 +11,7 @@ measureCols_raw = [
 	'param_final_phase',
 	'param_vacincurmult',
 	'compound_trace',
+	'min_stage',
 ]
 measureCols = [
 	'R0',
@@ -19,6 +20,7 @@ measureCols = [
 	'Kids',
 	'IncurRate',
 	'TracePower',
+	'MinStage',
 ]
 
 def indexRenameFunc(chunk):
@@ -35,6 +37,10 @@ def indexRenameFunc(chunk):
 	index['param_final_phase'] = index['param_final_phase'].replace({
 		3 : 'No',
 		4 : 'Yes',
+	})
+	index['min_stage'] = index['min_stage'].replace({
+		0 : '1a',
+		2 : '2',
 	})
 	
 	renameCols = {measureCols_raw[i] : measureCols[i] for i in range(len(measureCols))}
