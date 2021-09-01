@@ -12,6 +12,7 @@ measureCols_raw = [
 	'param_vacincurmult',
 	'compound_trace',
 	'min_stage',
+	'sensitivity',
 ]
 measureCols = [
 	'R0',
@@ -21,6 +22,7 @@ measureCols = [
 	'IncurRate',
 	'TracePower',
 	'MinStage',
+	'sensitivity',
 ]
 
 def indexRenameFunc(chunk):

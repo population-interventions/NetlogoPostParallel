@@ -30,7 +30,7 @@ def indexRenameFunc(chunk):
 	#	'_az_50.csv' : 'AZ_50',
 	#})
 	index['data_suffix'] = index['data_suffix'].replace({
-		'_65' : 0.6,
+		'_65' : 0.65,
 		'_70' : 0.7,
 		'_80' : 0.8,
 		'_85' : 0.85,
