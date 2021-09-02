@@ -34,6 +34,7 @@ def indexRenameFunc(chunk):
 		'_70' : 0.7,
 		'_80' : 0.8,
 		'_85' : 0.85,
+		'_90' : 0.9,
 		'_95' : 0.95,
 	})
 	index['data_suffix_2'] = index['data_suffix_2'].replace({
