@@ -7,12 +7,14 @@ from processNetlogoOutput import DoAbmProcessing
 measureCols_raw = [
 	'cont_stage',
 	'vac_ease_schools_open',
+	'vac_ease_stage',
 ]
 measureCols = [
 	'Stage',
 	'VacEaseSchoolOpen',
+	'VacEaseStage',
 ]
-
+	
 def indexRenameFunc(chunk):
 	index = chunk.index.to_frame()
 	#index['R0'] = index['global_transmissibility_out'].apply(lambda x: 3.75 if x < 0.61333 else (4.17 if x < 0.681666 else 4.58))
