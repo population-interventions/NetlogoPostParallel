@@ -6,11 +6,11 @@ from processNetlogoOutput import DoAbmProcessing
 
 measureCols_raw = [
 	'cont_stage',
-	'vac_lockdown_ease',
+	'vac_ease_schools_open',
 ]
 measureCols = [
 	'Stage',
-	'VacEase',
+	'VacEaseSchoolOpen',
 ]
 
 def indexRenameFunc(chunk):
