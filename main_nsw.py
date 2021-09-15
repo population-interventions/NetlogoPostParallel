@@ -8,11 +8,13 @@ measureCols_raw = [
 	'cont_stage',
 	'vac_ease_schools_open',
 	'vac_ease_stage',
+	'vac_ease_everyone',
 ]
 measureCols = [
 	'Stage',
 	'VacEaseSchoolOpen',
 	'VacEaseStage',
+	'VacEaseEveryone',
 ]
 	
 def indexRenameFunc(chunk):
