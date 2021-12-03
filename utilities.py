@@ -99,7 +99,7 @@ def CrossIndex(df, indexDf):
 
 def SplitNetlogoList(chunk, cohorts, name, outputName):
 	split_names = [outputName + str(i) for i in range(0, cohorts)]
-	df = chunk[name].str.replace('\[', '').str.replace('\]', '').str.split(' ', expand=True)
+	df = chunk[name].str.replace('[', '', regex=False).str.replace(']', '', regex=False).str.split(' ', expand=True)
 	if cohorts - 1 not in df:
 		for i in range(cohorts):
 			if i not in df:
@@ -111,7 +111,7 @@ def SplitNetlogoList(chunk, cohorts, name, outputName):
   
 def SplitNetlogoNestedList(chunk, cohorts, days, colName, name, fillTo=365):
 	split_names = [(name, j, i) for j in range(0, days) for i in range(0, cohorts)]
-	df = chunk[colName].str.replace('\[', '').str.replace('\]', '').str.split(' ', expand=True)
+	df = chunk[colName].str.replace('[', '', regex=False).str.replace(']', '', regex=False).str.split(' ', expand=True)
 	if days * cohorts - 1 not in df:
 		for i in range(days * cohorts):
 			if i not in df:
