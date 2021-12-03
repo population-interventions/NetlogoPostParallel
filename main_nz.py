@@ -52,7 +52,7 @@ def indexRenameFunc(chunk):
 
 
 inputDir = 'outputs/snowy/'
-outputDir = 'outputs/post/'
+outputDir = 'outputs_post/'
 day_override = 364
 
 
