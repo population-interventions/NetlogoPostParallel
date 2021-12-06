@@ -12,6 +12,19 @@ import pathlib
 fileCreated = {}
 HEAD_MODE = True
 
+def GetGitTimeIdentifier():
+	now = datetime.now()
+	dateString = now.strftime('%Y-%m-%dT%H_%M_%S')
+	shortHash = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()
+	return '{}_g{}'.format(dateString, shortHash)
+
+
+def WriteRunIdFile(path, identifier):
+	MakePath(path)
+	with open(path + '.txt', 'w') as f:
+		f.write(identifier)
+
+
 def isfloat(value):
 	try:
 		float(value)

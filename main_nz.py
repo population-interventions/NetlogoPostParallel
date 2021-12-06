@@ -51,8 +51,8 @@ def indexRenameFunc(chunk):
 	return chunk
 
 
-inputDir = 'outputs/snowy/'
-outputDir = 'outputs_post/'
+inputDir = 'output_raw/'
+outputDir = 'output_post/'
 day_override = 364
 
 
