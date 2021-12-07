@@ -223,8 +223,9 @@ def ProcessInfectChunk(df, chortDf, outputPrefix, arrayIndex, doTenday=False):
 	df = df.stack('day')
 	for age in ageCols:
 		# TODO, vectorise?
-		df[age - 5] = df[age]/2
-		df[age] = df[age]/2
+		if age in df:
+			df[age - 5] = df[age]/2
+			df[age] = df[age]/2
 	df = df.unstack('day')
 	
 	# Add extra cohorts missing from ABM
